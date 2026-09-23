@@ -137,3 +137,7 @@ This project is an educational/demo application. Authentication and data storage
 ## Author
 
 Developed as a placement preparation project to explore frontend development, JavaScript application architecture, quiz systems, performance tracking, and AI-assisted learning concepts.
+
+## 🚀 Live Demo
+
+👉 [AI Placement Preparation Platform](https://ai-placement-prep-site.netlify.app/)
