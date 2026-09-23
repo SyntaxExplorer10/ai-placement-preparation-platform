@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Placement Preparation Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root {
+  --primary:       #4f46e5;
+  --primary-dark:  #4338ca;
+  --primary-light: #eef2ff;
+  --admin:         #111827;
+  --bg:            #f7f8fa;
+  --text:          #1f2937;
+  --muted:         #6b7280;
+  --border:        #e5e7eb;
+  --success:       #16a34a;
+  --danger:        #dc2626;
+  --warning:       #d97706;
+  --radius:        12px;
+  --shadow:        0 2px 12px rgba(0,0,0,.06);
+  --shadow-hover:  0 6px 20px rgba(79,70,229,.15);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-dark); }
+
+h1, h2, h3, h4, h5 { font-weight: 700; margin-top: 0; }
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.col { flex: 1 1 200px; min-width: 0; }
+
+/* ---------- Navbar ---------- */
+.navbar {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,.08);
+  padding: 12px 0;
+}
+.navbar.admin { background: var(--admin); }
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.navbar-brand {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: .3px;
+  cursor: pointer;
+}
+.navbar nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.navbar .btn-outline-light {
+  border: 1px solid rgba(255,255,255,.5);
+  color: #fff;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.navbar .btn-outline-light:hover { background: rgba(255,255,255,.15); }
+.navbar .btn-light {
+  background: #fff;
+  color: var(--primary);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.navbar .btn-light:hover { background: #f3f4f6; }
+.navbar .user {
+  color: #fff;
+  font-size: .85rem;
+  margin-right: 8px;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.card h3 { margin-top: 0; margin-bottom: 12px; }
+
+/* ---------- Tiles ---------- */
+.tile { cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.tile h4 { margin: 0 0 6px; font-size: 1.05rem; }
+.tile p { color: var(--muted); font-size: .875rem; margin: 0; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: center;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: #15803d; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 5px 10px; font-size: .8rem; }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- Forms ---------- */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: .875rem;
+  margin-bottom: 6px;
+}
+.form-control, .form-select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: .95rem;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+}
+.form-text { font-size: .8rem; color: var(--muted); }
+
+/* ---------- Auth ---------- */
+.auth-wrap {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.auth-card { width: 100%; max-width: 420px; }
+.auth-card .card { padding: 28px; }
+
+/* ---------- Alerts ---------- */
+.alert {
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: .9rem;
+  margin-bottom: 14px;
+  border: none;
+}
+.alert-danger  { background: #fee2e2; color: #991b1b; }
+.alert-success { background: #dcfce7; color: #166534; }
+.alert-info    { background: #dbeafe; color: #1e40af; }
+.alert-warning { background: #fef3c7; color: #92400e; }
+
+/* ---------- Stats ---------- */
+.stats-card { text-align: center; padding: 16px; }
+.stats-card .stat-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.1;
+}
+.stats-card .stat-label {
+  color: var(--muted);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-top: 4px;
+}
+
+/* ---------- Question options ---------- */
+.question-option {
+  cursor: pointer;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: #fff;
+  transition: all .15s;
+  user-select: none;
+}
+.question-option:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+.question-option.selected {
+  background: #e0e7ff;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-block;
+  font-size: .72rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #374151;
+}
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-danger  { background: #fee2e2; color: #991b1b; }
+.badge-info    { background: #dbeafe; color: #1e40af; }
+
+.ai-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* ---------- Difficulty ---------- */
+.difficulty-EASY   { color: var(--success); font-weight: 700; font-size: .8rem; }
+.difficulty-MEDIUM { color: var(--warning); font-weight: 700; font-size: .8rem; }
+.difficulty-HARD   { color: var(--danger);  font-weight: 700; font-size: .8rem; }
+
+/* ---------- Timer ---------- */
+.timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #fff;
+  font-size: .95rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0,0,0,.35);
+}
+.timer.danger { background: var(--danger); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+
+/* ---------- Table ---------- */
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: .9rem;
+}
+.table th {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--muted);
+}
+.table tbody tr:hover { background: var(--primary-light); }
+
+/* ---------- Misc ---------- */
+.hidden { display: none !important; }
+.text-muted { color: var(--muted); }
+.text-center { text-align: center; }
+.mt-1 { margin-top: 6px; }
+.mt-2 { margin-top: 12px; }
+.mt-3 { margin-top: 18px; }
+.mt-4 { margin-top: 24px; }
+.mb-1 { margin-bottom: 6px; }
+.mb-2 { margin-bottom: 12px; }
+.mb-3 { margin-bottom: 18px; }
+.mb-4 { margin-bottom: 24px; }
+.fw-bold { font-weight: 700; }
+.small { font-size: .85rem; }
+.flex { display: flex; }
+.between { justify-content: space-between; }
+.center { align-items: center; }
+.gap-2 { gap: 12px; }
+details summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ---------- Splash ---------- */
+.splash {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+.splash h1 { font-size: 2rem; margin-bottom: 12px; }
+.splash p  { color: var(--muted); max-width: 520px; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<!-- Root mount point — all pages are rendered here -->
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   AI Placement Preparation Platform — Single-File Frontend
+   ------------------------------------------------------------
+   A fully working, browser-only demo. State is kept in memory
+   and persisted to localStorage so a refresh keeps you signed in.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. "Database" — seeded question bank & users
+   ------------------------------------------------------------ */
+const DB = {
+    users: [
+        { userId: 1, name: "Admin",         email: "admin@placement.com",   password: "admin123",   role: "ADMIN"   },
+        { userId: 2, name: "Demo Student",  email: "student@placement.com", password: "student123", role: "STUDENT" }
+    ],
+    categories: [
+        { categoryId: 1, name: "Quantitative Aptitude", type: "APTITUDE"    },
+        { categoryId: 2, name: "Logical Reasoning",     type: "APTITUDE"    },
+        { categoryId: 3, name: "Verbal Ability",        type: "APTITUDE"    },
+        { categoryId: 4, name: "Data Structures",       type: "PROGRAMMING" },
+        { categoryId: 5, name: "Algorithms",            type: "PROGRAMMING" },
+        { categoryId: 6, name: "DBMS",                  type: "PROGRAMMING" },
+        { categoryId: 7, name: "Operating Systems",     type: "PROGRAMMING" },
+        { categoryId: 8, name: "Java",                  type: "PROGRAMMING" }
+    ],
+    questions: [
+        { questionId: 1,  categoryId: 1, text: "If 3x + 7 = 22, what is x?",
+          optionA: "3", optionB: "5", optionC: "7", optionD: "9",
+          correctOption: "B", difficulty: "EASY", explanation: "3x = 15, so x = 5." },
+        { questionId: 2,  categoryId: 1, text: "A train travels 240 km in 4 hours. What is its average speed?",
+          optionA: "40 km/h", optionB: "50 km/h", optionC: "60 km/h", optionD: "70 km/h",
+          correctOption: "C", difficulty: "EASY", explanation: "Speed = Distance / Time = 240 / 4 = 60 km/h." },
+        { questionId: 3,  categoryId: 1, text: "What is 25% of 480?",
+          optionA: "100", optionB: "110", optionC: "120", optionD: "130",
+          correctOption: "C", difficulty: "EASY", explanation: "0.25 × 480 = 120." },
+        { questionId: 4,  categoryId: 1, text: "If a number is increased by 20% and then decreased by 20%, the net change is:",
+          optionA: "+4%", optionB: "0%", optionC: "-4%", optionD: "-2%",
+          correctOption: "C", difficulty: "MEDIUM", explanation: "1.2 × 0.8 = 0.96 → -4%." },
+        { questionId: 5,  categoryId: 2, text: "Find the next number: 2, 6, 12, 20, ?",
+          optionA: "28", optionB: "30", optionC: "32", optionD: "34",
+          correctOption: "B", difficulty: "MEDIUM", explanation: "Differences are 4, 6, 8, 10 → 20 + 10 = 30." },
+        { questionId: 6,  categoryId: 2, text: "If in a code, CAT = 3120, then DOG = ?",
+          optionA: "4157", optionB: "4158", optionC: "4156", optionD: "4155",
+          correctOption: "A", difficulty: "HARD", explanation: "C=3, A=1, T=20; D=4, O=15, G=7 → 4157." },
+        { questionId: 7,  categoryId: 3, text: "Choose the synonym for 'abundant'.",
+          optionA: "Scarce", optionB: "Plentiful", optionC: "Rare", optionD: "Meager",
+          correctOption: "B", difficulty: "EASY", explanation: "Abundant = plentiful." },
+        { questionId: 8,  categoryId: 3, text: "Identify the antonym of 'candid'.",
+          optionA: "Frank", optionB: "Honest", optionC: "Evasive", optionD: "Open",
+          correctOption: "C", difficulty: "MEDIUM", explanation: "Candid means open; the antonym is evasive." },
+        { questionId: 9,  categoryId: 4, text: "Which data structure uses LIFO order?",
+          optionA: "Queue", optionB: "Stack", optionC: "List", optionD: "Tree",
+          correctOption: "B", difficulty: "EASY", explanation: "Stack = Last-In First-Out." },
+        { questionId: 10, categoryId: 4, text: "Time complexity of inserting at the head of a singly linked list?",
+          optionA: "O(1)", optionB: "O(log n)", optionC: "O(n)", optionD: "O(n log n)",
+          correctOption: "A", difficulty: "MEDIUM", explanation: "Just adjust the head pointer — O(1)." },
+        { questionId: 11, categoryId: 5, text: "Time complexity of binary search on a sorted array?",
+          optionA: "O(n)", optionB: "O(log n)", optionC: "O(n log n)", optionD: "O(1)",
+          correctOption: "B", difficulty: "MEDIUM", explanation: "Halves the search space each step." },
+        { questionId: 12, categoryId: 5, text: "Which sorting algorithm has O(n²) worst-case and is stable?",
+          optionA: "Quick Sort", optionB: "Heap Sort", optionC: "Insertion Sort", optionD: "Selection Sort",
+          correctOption: "C", difficulty: "MEDIUM", explanation: "Insertion sort is O(n²) worst-case and stable." },
+        { questionId: 13, categoryId: 6, text: "Which normal form eliminates transitive dependencies?",
+          optionA: "1NF", optionB: "2NF", optionC: "3NF", optionD: "BCNF",
+          correctOption: "C", difficulty: "MEDIUM", explanation: "3NF removes transitive dependencies." },
+        { questionId: 14, categoryId: 6, text: "In SQL, which clause is used to filter groups?",
+          optionA: "WHERE", optionB: "HAVING", optionC: "GROUP BY", optionD: "ORDER BY",
+          correctOption: "B", difficulty: "EASY", explanation: "HAVING filters groups; WHERE filters rows." },
+        { questionId: 15, categoryId: 7, text: "Which scheduling algorithm can cause starvation?",
+          optionA: "Round Robin", optionB: "FCFS", optionC: "Priority Scheduling", optionD: "SJF (non-preemptive)",
+          correctOption: "C", difficulty: "HARD", explanation: "Low-priority processes may never run." },
+        { questionId: 16, categoryId: 8, text: "Which keyword prevents inheritance in Java?",
+          optionA: "static", optionB: "final", optionC: "const", optionD: "private",
+          correctOption: "B", difficulty: "EASY", explanation: "A final class cannot be extended." },
+        { questionId: 17, categoryId: 8, text: "What is the size of an int in Java?",
+          optionA: "2 bytes", optionB: "4 bytes", optionC: "8 bytes", optionD: "Depends on JVM",
+          correctOption: "B", difficulty: "EASY", explanation: "Java int is always 32-bit (4 bytes)." },
+        { questionId: 18, categoryId: 8, text: "Which collection allows duplicate elements?",
+          optionA: "Set", optionB: "Map", optionC: "List", optionD: "None",
+          correctOption: "C", difficulty: "EASY", explanation: "List allows duplicates; Set does not." }
+    ],
+    quizzes:       [],   // { quizId, userId, startedAt, submittedAt, status, timeLimitSeconds, questionIds }
+    userAnswers:   [],   // { quizId, questionId, selected, isCorrect }
+    quizResults:   [],   // { quizId, score, total, correct }
+    aiHistory:     []    // { userId, type, prompt, response, createdAt }
+};
+
+const STORAGE_KEY = "ai_placement_state_v1";
+
+/* ------------------------------------------------------------
+   2. Persistence
+   ------------------------------------------------------------ */
+function persist() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            users: DB.users,
+            categories: DB.categories,
+            questions: DB.questions,
+            quizzes: DB.quizzes,
+            userAnswers: DB.userAnswers,
+            quizResults: DB.quizResults,
+            aiHistory: DB.aiHistory,
+            session: session
+        }));
+    } catch (e) {
+        console.warn("persist failed", e);
+    }
+}
+
+function restore() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        Object.assign(DB, {
+            users:       saved.users       ?? DB.users,
+            categories:  saved.categories  ?? DB.categories,
+            questions:   saved.questions   ?? DB.questions,
+            quizzes:     saved.quizzes     ?? [],
+            userAnswers: saved.userAnswers ?? [],
+            quizResults: saved.quizResults ?? [],
+            aiHistory:   saved.aiHistory   ?? []
+        });
+        if (saved.session) session = saved.session;
+    } catch (e) {
+        console.warn("restore failed", e);
+    }
+}
+
+/* ------------------------------------------------------------
+   3. Session
+   ------------------------------------------------------------ */
+let session = null;   // { userId, name, role }
+
+function currentUser() {
+    if (!session) return null;
+    return DB.users.find(u => u.userId === session.userId) || null;
+}
+
+function logout() {
+    session = null;
+    persist();
+    navigate("splash");
+}
+
+/* ------------------------------------------------------------
+   4. Router
+   ------------------------------------------------------------ */
+let currentRoute = "splash";
+let routeParams  = {};
+
+function navigate(route, params = {}) {
+    currentRoute = route;
+    routeParams  = params;
+    persist();
+    render();
+    window.scrollTo(0, 0);
+}
+
+/* ------------------------------------------------------------
+   5. Helpers
+   ------------------------------------------------------------ */
+function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function formatDate(value) {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+}
+
+function categoryById(id) {
+    return DB.categories.find(c => c.categoryId === id);
+}
+
+function uid() {
+    return Date.now() + Math.floor(Math.random() * 1000);
+}
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+/* ------------------------------------------------------------
+   6. AI Engine (simulated locally, no network)
+   ------------------------------------------------------------ */
+const AI = {
+    /**
+     * Generate an explanation for a wrong answer.
+     * Returns { mistake, correctAnswer, steps, tip }.
+     */
+    explain(question, selectedOption) {
+        const correct = question.correctOption;
+        const correctText = question["option" + correct];
+        const selectedText = selectedOption
+            ? question["option" + selectedOption]
+            : null;
+
+        const mistake = selectedText
+            ? `You chose "${selectedText}" (option ${selectedOption}), but the correct option is ${correct}.`
+            : `You did not answer this question. The correct option is ${correct}.`;
+
+        const steps = [
+            `Read the question carefully: "${question.text}"`,
+            `Identify what is being asked and the rule or formula that applies.`,
+            `Work out the answer step by step — for this question, the correct value is "${correctText}".`,
+            `Compare your working with the options and select the one that matches.`
+        ];
+
+        const tip = `Tip: ${question.explanation} Practice more "${categoryById(question.categoryId)?.name}" questions to reinforce this pattern.`;
+
+        return {
+            mistake,
+            correctAnswer: `${correct}. ${correctText}`,
+            steps,
+            tip
+        };
+    },
+
+    /**
+     * Analyse the student's accuracy per category and return the weakest ones.
+     */
+    weakCategories(userId) {
+        const answers = DB.userAnswers.filter(a => {
+            const q = DB.quizzes.find(x => x.quizId === a.quizId);
+            return q && q.userId === userId;
+        });
+
+        const byCat = {};
+        answers.forEach(a => {
+            const q = DB.questions.find(x => x.questionId === a.questionId);
+            if (!q) return;
+            const cat = q.categoryId;
+            byCat[cat] = byCat[cat] || { total: 0, correct: 0 };
+            byCat[cat].total++;
+            if (a.isCorrect) byCat[cat].correct++;
+        });
+
+        return Object.entries(byCat)
+            .map(([catId, s]) => ({
+                categoryId: Number(catId),
+                accuracy: s.correct / s.total,
+                total: s.total
+            }))
+            .filter(s => s.accuracy < 0.6)
+            .sort((a, b) => a.accuracy - b.accuracy)
+            .map(s => s.categoryId);
+    },
+
+    /**
+     * Generate `count` personalized questions for a student's weak topics.
+     * Uses hand-crafted templates to look like real generated MCQs.
+     */
+    generateQuestions(userId, count = 5) {
+        const weak = this.weakCategories(userId);
+        const fallback = DB.categories
+            .filter(c => c.type === "APTITUDE" || c.type === "PROGRAMMING")
+            .map(c => c.categoryId);
+
+        const targetCats = (weak.length ? weak : fallback).slice(0, 3);
+
+        const templates = {
+            1: [ // Quantitative Aptitude
+                { q: "What is 15% of 240?", a: "30", b: "36", c: "40", d: "44", ans: "B", exp: "0.15 × 240 = 36." },
+                { q: "If 5x − 3 = 22, what is x?", a: "3", b: "4", c: "5", d: "6", ans: "C", exp: "5x = 25 → x = 5." },
+                { q: "A sum doubles in 8 years at simple interest. Rate?", a: "10%", b: "12.5%", c: "15%", d: "8%", ans: "B", exp: "100/P × 8 = 100 → 12.5%." }
+            ],
+            2: [ // Logical Reasoning
+                { q: "Next in series: 3, 9, 27, 81, ?", a: "162", b: "243", c: "216", d: "324", ans: "B", exp: "Multiply by 3 → 243." },
+                { q: "If A > B and B > C, then:", a: "A < C", b: "A = C", c: "A > C", d: "Cannot say", ans: "C", exp: "Transitive: A > C." }
+            ],
+            3: [ // Verbal
+                { q: "Choose the synonym for 'lucid'.", a: "Confusing", b: "Clear", c: "Dark", d: "Heavy", ans: "B", exp: "Lucid = clear." },
+                { q: "Antonym of 'frugal'.", a: "Thrifty", b: "Extravagant", c: "Careful", d: "Simple", ans: "B", exp: "Frugal ↔ extravagant." }
+            ],
+            4: [ // Data Structures
+                { q: "Which structure uses FIFO?", a: "Stack", b: "Queue", c: "Tree", d: "Graph", ans: "B", exp: "Queue = First-In First-Out." },
+                { q: "Hash table average lookup time?", a: "O(1)", b: "O(log n)", c: "O(n)", d: "O(n²)", ans: "A", exp: "Average O(1)." }
+            ],
+            5: [ // Algorithms
+                { q: "Which sort is fastest on nearly-sorted data?", a: "Quick", b: "Insertion", c: "Merge", d: "Heap", ans: "B", exp: "Insertion is O(n) on nearly-sorted data." },
+                { q: "Time complexity of merge sort?", a: "O(n)", b: "O(log n)", c: "O(n log n)", d: "O(n²)", ans: "C", exp: "Merge sort is O(n log n) always." }
+            ],
+            6: [ // DBMS
+                { q: "Which key uniquely identifies a row?", a: "Foreign key", b: "Primary key", c: "Candidate key", d: "Composite key", ans: "B", exp: "Primary key uniquely identifies a row." },
+                { q: "SQL command to remove a table?", a: "DELETE", b: "DROP", c: "TRUNCATE", d: "REMOVE", ans: "B", exp: "DROP TABLE removes structure and data." }
+            ],
+            7: [ // OS
+                { q: "Which is not a scheduling algorithm?", a: "FCFS", b: "SJF", c: "LRU", d: "Round Robin", ans: "C", exp: "LRU is a page replacement policy." },
+                { q: "Deadlock requires all of the following EXCEPT:", a: "Mutual exclusion", b: "Hold and wait", c: "Preemption", d: "Circular wait", ans: "C", exp: "Deadlock needs no preemption, not preemption." }
+            ],
+            8: [ // Java
+                { q: "Which is not a primitive type in Java?", a: "int", b: "boolean", c: "String", d: "char", ans: "C", exp: "String is a class, not a primitive." },
+                { q: "Keyword to inherit a class in Java?", a: "implements", b: "extends", c: "inherits", d: "super", ans: "B", exp: "extends inherits a class." }
+            ]
+        };
+
+        const result = [];
+        const difficulties = ["EASY", "MEDIUM", "HARD"];
+
+        let pool = [];
+        targetCats.forEach(catId => {
+            const items = templates[catId] || [];
+            items.forEach(t => pool.push({ ...t, categoryId: catId }));
+        });
+
+        // If we still don't have enough, pull from any template
+        if (pool.length < count) {
+            Object.entries(templates).forEach(([catId, items]) => {
+                items.forEach(t => pool.push({ ...t, categoryId: Number(catId) }));
+            });
+        }
+
+        pool = shuffle(pool).slice(0, count);
+
+        pool.forEach((t, i) => {
+            result.push({
+                questionId: -1 - i,          // temporary; not persisted
+                categoryId: t.categoryId,
+                text: t.q,
+                optionA: t.a, optionB: t.b, optionC: t.c, optionD: t.d,
+                correctOption: t.ans,
+                difficulty: difficulties[Math.floor(Math.random() * 3)],
+                explanation: t.exp,
+                aiGenerated: true
+            });
+        });
+
+        // If we somehow still have fewer than count, pad with random pool
+        while (result.length < count) {
+            const q = DB.questions[Math.floor(Math.random() * DB.questions.length)];
+            result.push({
+                ...q,
+                questionId: -100 - result.length,
+                aiGenerated: true
+            });
+        }
+
+        // Log to AI history
+        DB.aiHistory.push({
+            userId,
+            type: "GENERATE",
+            prompt: `Weak categories: ${targetCats.join(", ")}`,
+            response: `${result.length} questions generated`,
+            createdAt: new Date().toISOString()
+        });
+        persist();
+
+        return result;
+    },
+
+    logExplain(userId, questionId, selectedOption, response) {
+        DB.aiHistory.push({
+            userId,
+            type: "EXPLAIN",
+            prompt: `Question #${questionId}, selected ${selectedOption}`,
+            response: JSON.stringify(response).slice(0, 500),
+            createdAt: new Date().toISOString()
+        });
+        persist();
+    }
+};
+
+/* ------------------------------------------------------------
+   7. Views
+   ------------------------------------------------------------ */
+
+/* ---------- Shared UI ---------- */
+function navbar() {
+    const user = currentUser();
+    if (!user) return "";
+    const admin = user.role === "ADMIN";
+    const cls = admin ? "navbar admin" : "navbar";
+    return `
+        <div class="${cls}">
+            <div class="container">
+                <div class="navbar-brand" onclick="navigate('${admin ? "admin-dashboard" : "student-dashboard"}')">
+                    AI Placement Prep
+                </div>
+                <nav>
+                    ${!admin ? `
+                        <button class="btn-outline-light" onclick="navigate('practice')">Practice</button>
+                        <button class="btn-outline-light" onclick="navigate('quiz-setup')">Quiz</button>
+                        <button class="btn-outline-light" onclick="navigate('history')">History</button>
+                        <button class="btn-outline-light" onclick="navigate('ai-assistant')">AI</button>
+                    ` : `
+                        <button class="btn-outline-light" onclick="navigate('admin-questions')">Questions</button>
+                        <button class="btn-outline-light" onclick="navigate('admin-categories')">Categories</button>
+                        <button class="btn-outline-light" onclick="navigate('admin-students')">Students</button>
+                    `}
+                    <span class="user">${escapeHtml(user.name)}</span>
+                    <button class="btn-light" onclick="logout()">Logout</button>
+                </nav>
+            </div>
+        </div>
+    `;
+}
+
+/* ---------- Splash ---------- */
+function viewSplash() {
+    return `
+        <div class="splash">
+            <h1>AI Placement Preparation Platform</h1>
+            <p>Practice aptitude &amp; programming questions, take timed quizzes, and get AI-powered
+               explanations and personalized practice recommendations.</p>
+            <div class="flex gap-2">
+                <button class="btn btn-primary" onclick="navigate('login')">Sign in</button>
+                <button class="btn btn-outline" onclick="navigate('register')">Create account</button>
+            </div>
+            <div class="row mt-4" style="max-width:760px; width:100%;">
+                <div class="col card">
+                    <h4>📚 Practice</h4>
+                    <p class="text-muted small">Filter questions by category and difficulty.</p>
+                </div>
+                <div class="col card">
+                    <h4>⏱ Timed Quizzes</h4>
+                    <p class="text-muted small">Auto-scored mock tests with instant results.</p>
+                </div>
+                <div class="col card">
+                    <h4>🤖 AI Assistant <span class="ai-badge">AI</span></h4>
+                    <p class="text-muted small">Explanations &amp; personalized questions.</p>
+                </div>
+            </div>
+            <p class="text-muted small mt-4">
+                Demo accounts — Admin: <b>admin@placement.com / admin123</b> &nbsp;·&nbsp;
+                Student: <b>student@placement.com / student123</b>
+            </p>
+        </div>
+    `;
+}
+
+/* ---------- Login ---------- */
+function viewLogin() {
+    return `
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div class="text-center mb-3">
+                    <h2 style="margin-bottom:4px">AI Placement Prep</h2>
+                    <p class="text-muted small">Sign in to continue</p>
+                </div>
+                <div class="card">
+                    <div id="loginErr" class="alert alert-danger hidden"></div>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="email" id="email"
+                                   placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input class="form-control" type="password" id="password"
+                                   placeholder="••••••••" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+                    </form>
+                    <p class="text-center small mt-3 mb-0">
+                        No account?
+                        <a href="#" onclick="navigate('register');return false;">Create one</a>
+                    </p>
+                    <p class="text-center small mt-2 mb-0">
+                        <a href="#" onclick="navigate('splash');return false;">← Back</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function afterLoginRender() {
+    const form = document.getElementById("loginForm");
+    if (form) {
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            const email = document.getElementById("email").value.trim().toLowerCase();
+            const password = document.getElementById("password").value;
+            const err = document.getElementById("loginErr");
+
+            const user = DB.users.find(
+                u => u.email.toLowerCase() === email && u.password === password
+            );
+
+            if (!user) {
+                err.textContent = "Invalid email or password.";
+                err.classList.remove("hidden");
+                return;
+            }
+
+            session = { userId: user.userId, name: user.name, role: user.role };
+            persist();
+            navigate(user.role === "ADMIN" ? "admin-dashboard" : "student-dashboard");
+        });
+    }
+}
+
+/* ---------- Register ---------- */
+function viewRegister() {
+    return `
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div class="text-center mb-3">
+                    <h2 style="margin-bottom:4px">Create account</h2>
+                    <p class="text-muted small">Start preparing for placements</p>
+                </div>
+                <div class="card">
+                    <div id="regErr" class="alert alert-danger hidden"></div>
+                    <div id="regOk" class="alert alert-success hidden"></div>
+                    <form id="regForm">
+                        <div class="form-group">
+                            <label for="name">Full name</label>
+                            <input class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input class="form-control" type="password" id="password"
+                                   minlength="6" required>
+                            <div class="form-text">At least 6 characters.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm">Confirm password</label>
+                            <input class="form-control" type="password" id="confirm"
+                                   minlength="6" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" type="submit">Register</button>
+                    </form>
+                    <p class="text-center small mt-3 mb-0">
+                        Have an account?
+                        <a href="#" onclick="navigate('login');return false;">Sign in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function afterRegisterRender() {
+    const form = document.getElementById("regForm");
+    if (!form) return;
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim().toLowerCase();
+        const pw = document.getElementById("password").value;
+        const cf = document.getElementById("confirm").value;
+        const err = document.getElementById("regErr");
+        const ok = document.getElementById("regOk");
+
+        err.classList.add("hidden");
+        ok.classList.add("hidden");
+
+        if (!name || !email || !pw) {
+            err.textContent = "Please fill in all fields.";
+            err.classList.remove("hidden");
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            err.textContent = "Please enter a valid email.";
+            err.classList.remove("hidden");
+            return;
+        }
+        if (pw.length < 6) {
+            err.textContent = "Password must be at least 6 characters.";
+            err.classList.remove("hidden");
+            return;
+        }
+        if (pw !== cf) {
+            err.textContent = "Passwords do not match.";
+            err.classList.remove("hidden");
+            return;
+        }
+        if (DB.users.some(u => u.email.toLowerCase() === email)) {
+            err.textContent = "That email is already registered.";
+            err.classList.remove("hidden");
+            return;
+        }
+
+        const user = {
+            userId: uid(),
+            name,
+            email,
+            password: pw,
+            role: "STUDENT"
+        };
+        DB.users.push(user);
+        session = { userId: user.userId, name: user.name, role: user.role };
+        persist();
+
+        ok.textContent = "Account created! Redirecting…";
+        ok.classList.remove("hidden");
+        setTimeout(() => navigate("student-dashboard"), 600);
+    });
+}
+
+/* ---------- Student Dashboard ---------- */
+function viewStudentDashboard() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    const completed = DB.quizResults
+        .filter(r => DB.quizzes.find(q => q.quizId === r.quizId && q.userId === user.userId));
+    const quizzesTaken = completed.length;
+    const avg = quizzesTaken
+        ? Math.round(completed.reduce((s, r) => s + r.score, 0) / quizzesTaken)
+        : null;
+    const best = quizzesTaken
+        ? Math.max(...completed.map(r => r.score))
+        : null;
+
+    const recent = DB.quizzes
+        .filter(q => q.userId === user.userId)
+        .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt))
+        .slice(0, 5);
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-1">Welcome back, ${escapeHtml(user.name)} 👋</h2>
+            <p class="text-muted mb-4">What would you like to work on today?</p>
+
+            <div class="row mb-4">
+                <div class="col card stats-card">
+                    <div class="stat-value">${quizzesTaken}</div>
+                    <div class="stat-label">Quizzes Taken</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${avg != null ? avg + "%" : "—"}</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${best != null ? best + "%" : "—"}</div>
+                    <div class="stat-label">Best Score</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${DB.questions.length}</div>
+                    <div class="stat-label">Questions Available</div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col card tile" onclick="navigate('practice')">
+                    <h4>📚 Practice</h4>
+                    <p>Browse the question bank, filter by category &amp; difficulty.</p>
+                </div>
+                <div class="col card tile" onclick="navigate('quiz-setup')">
+                    <h4>⏱ Start Quiz</h4>
+                    <p>Take a timed mock test with automatic scoring.</p>
+                </div>
+                <div class="col card tile" onclick="navigate('history')">
+                    <h4>📈 History</h4>
+                    <p>Review past results and track your progress.</p>
+                </div>
+                <div class="col card tile" onclick="navigate('ai-assistant')">
+                    <h4>🤖 AI Assistant <span class="ai-badge">AI</span></h4>
+                    <p>Personalized practice based on your weak topics.</p>
+                </div>
+            </div>
+
+            <div class="flex between center mb-2">
+                <h3 style="margin:0">Recent Quizzes</h3>
+                <a href="#" onclick="navigate('history');return false;" class="small">View all →</a>
+            </div>
+            <div class="card">
+                ${recent.length === 0
+                    ? `<p class="text-muted text-center" style="margin:20px 0">
+                           You haven't taken any quizzes yet. Start one to see your progress here.
+                       </p>`
+                    : `<table class="table">
+                        <thead><tr>
+                            <th>Quiz</th><th>Started</th><th>Status</th><th>Score</th><th></th>
+                        </tr></thead>
+                        <tbody>
+                            ${recent.map(r => {
+                                const res = DB.quizResults.find(x => x.quizId === r.quizId);
+                                return `
+                                    <tr>
+                                        <td>#${r.quizId}</td>
+                                        <td class="text-muted small">${formatDate(r.startedAt)}</td>
+                                        <td><span class="badge ${r.status === "COMPLETED" ? "badge-success" : ""}">${escapeHtml(r.status)}</span></td>
+                                        <td>${res ? res.score + "%" : "—"}</td>
+                                        <td class="text-center">
+                                            ${res ? `<button class="btn btn-sm btn-outline" onclick="navigate('result',{quizId:${r.quizId}})">View</button>` : ""}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                       </table>`
+                }
+            </div>
+        </div>
+    `;
+}
+
+/* ---------- Practice ---------- */
+function viewPractice() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    const catId  = routeParams.categoryId  || "";
+    const diff   = routeParams.difficulty  || "";
+
+    let list = DB.questions;
+    if (catId) list = list.filter(q => q.categoryId === Number(catId));
+    if (diff)  list = list.filter(q => q.difficulty === diff);
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-1">Practice Questions</h2>
+            <p class="text-muted mb-3">Browse and filter the question bank.</p>
+
+            <div class="card mb-3">
+                <div class="row">
+                    <div class="col">
+                        <label class="form-group"><b class="small">Category</b></label>
+                        <select class="form-select" id="catFilter">
+                            <option value="">All categories</option>
+                            ${DB.categories.map(c => `
+                                <option value="${c.categoryId}" ${String(c.categoryId) === String(catId) ? "selected" : ""}>
+                                    ${escapeHtml(c.name)}
+                                </option>
+                            `).join("")}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-group"><b class="small">Difficulty</b></label>
+                        <select class="form-select" id="diffFilter">
+                            <option value="">All difficulties</option>
+                            ${["EASY","MEDIUM","HARD"].map(d => `
+                                <option ${d === diff ? "selected" : ""}>${d}</option>
+                            `).join("")}
+                        </select>
+                    </div>
+                    <div class="col" style="display:flex;align-items:flex-end;gap:8px">
+                        <button class="btn btn-primary" onclick="applyPracticeFilter()">Apply</button>
+                        <button class="btn btn-outline" onclick="navigate('practice')">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-muted small mb-2">${list.length} question${list.length === 1 ? "" : "s"} found</div>
+
+            <div>
+                ${list.length === 0
+                    ? `<div class="card text-center text-muted">No questions match your filter.</div>`
+                    : list.map(q => {
+                        const cat = categoryById(q.categoryId);
+                        const correct = q.correctOption;
+                        return `
+                            <div class="card mb-3">
+                                <div class="flex between center mb-2">
+                                    <div>
+                                        <span class="badge">${escapeHtml(cat?.name || "")}</span>
+                                        ${q.aiGenerated ? `<span class="ai-badge">AI</span>` : ""}
+                                    </div>
+                                    <span class="difficulty-${q.difficulty}">${q.difficulty}</span>
+                                </div>
+                                <div class="fw-bold mb-2">${escapeHtml(q.text)}</div>
+                                <div class="small mb-2">
+                                    ${["A","B","C","D"].map(o => `
+                                        <div class="mb-1">
+                                            <b>${o}.</b> ${escapeHtml(q["option" + o])}
+                                        </div>
+                                    `).join("")}
+                                </div>
+                                <details>
+                                    <summary>Show answer &amp; explanation</summary>
+                                    <div class="small mt-2">
+                                        <div class="mb-1">
+                                            <b>Correct:</b> ${correct} — ${escapeHtml(q["option" + correct])}
+                                        </div>
+                                        <div class="text-muted">${escapeHtml(q.explanation || "")}</div>
+                                    </div>
+                                </details>
+                            </div>
+                        `;
+                    }).join("")
+                }
+            </div>
+        </div>
+    `;
+}
+
+function applyPracticeFilter() {
+    const c = document.getElementById("catFilter").value;
+    const d = document.getElementById("diffFilter").value;
+    navigate("practice", { categoryId: c, difficulty: d });
+}
+
+/* ---------- Quiz Setup ---------- */
+function viewQuizSetup() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-1">Start a Quiz</h2>
+            <p class="text-muted mb-3">Choose a filter and take a timed mock test.</p>
+
+            <div class="card">
+                <div class="row">
+                    <div class="col">
+                        <label class="form-group"><b class="small">Category</b></label>
+                        <select class="form-select" id="qcat">
+                            <option value="">Any category</option>
+                            ${DB.categories.map(c => `
+                                <option value="${c.categoryId}">${escapeHtml(c.name)}</option>
+                            `).join("")}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-group"><b class="small">Difficulty</b></label>
+                        <select class="form-select" id="qdiff">
+                            <option value="">Any</option>
+                            <option>EASY</option><option>MEDIUM</option><option>HARD</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-group"><b class="small">Number of questions</b></label>
+                        <input class="form-control" type="number" id="qnum" value="5" min="1" max="15">
+                    </div>
+                    <div class="col" style="display:flex;align-items:flex-end">
+                        <button class="btn btn-primary btn-block" onclick="startQuiz()">Start Quiz</button>
+                    </div>
+                </div>
+                <p class="text-muted small mt-3 mb-0">You'll have 60 seconds per question.</p>
+            </div>
+        </div>
+    `;
+}
+
+let activeQuiz = null;     // { quizId, questions, answers, startedAt, timeLimitSeconds, expiresAt }
+let quizTimerHandle = null;
+
+function startQuiz() {
+    const user = currentUser();
+    if (!user) return;
+
+    const catId = document.getElementById("qcat").value;
+    const diff  = document.getElementById("qdiff").value;
+    const num   = Math.max(1, Math.min(15, Number(document.getElementById("qnum").value) || 5));
+
+    let pool = DB.questions;
+    if (catId) pool = pool.filter(q => q.categoryId === Number(catId));
+    if (diff)  pool = pool.filter(q => q.difficulty === diff);
+
+    if (pool.length === 0) {
+        alert("No questions match that filter. Try a wider selection.");
+        return;
+    }
+
+    const chosen = shuffle(pool).slice(0, Math.min(num, pool.length));
+    const timeLimitSeconds = chosen.length * 60;
+
+    const quizId = uid();
+    const quiz = {
+        quizId,
+        userId: user.userId,
+        startedAt: new Date().toISOString(),
+        submittedAt: null,
+        status: "IN_PROGRESS",
+        timeLimitSeconds,
+        questionIds: chosen.map(q => q.questionId)
+    };
+    DB.quizzes.push(quiz);
+
+    activeQuiz = {
+        quizId,
+        questions: chosen,
+        answers: {},
+        startedAt: Date.now(),
+        timeLimitSeconds,
+        expiresAt: Date.now() + timeLimitSeconds * 1000
+    };
+
+    persist();
+    navigate("quiz");
+}
+
+/* ---------- Quiz Runner ---------- */
+function viewQuiz() {
+    if (!activeQuiz) { navigate("quiz-setup"); return ""; }
+    const { questions, answers } = activeQuiz;
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <div class="flex between center mb-3">
+                <h2 style="margin:0">Quiz #${activeQuiz.quizId}</h2>
+                <div id="timerBox" class="timer">--:--</div>
+            </div>
+
+            ${questions.map((q, i) => `
+                <div class="card mb-3">
+                    <div class="flex between center mb-2">
+                        <span class="badge">${escapeHtml(categoryById(q.categoryId)?.name || "")}</span>
+                        <span class="difficulty-${q.difficulty}">${q.difficulty}</span>
+                    </div>
+                    <div class="fw-bold mb-3">${i + 1}. ${escapeHtml(q.text)}</div>
+                    ${["A","B","C","D"].map(o => `
+                        <div class="question-option ${answers[q.questionId] === o ? "selected" : ""}"
+                             onclick="selectAnswer(${q.questionId}, '${o}')">
+                            <b>${o}.</b> ${escapeHtml(q["option" + o])}
+                        </div>
+                    `).join("")}
+                </div>
+            `).join("")}
+
+            <button class="btn btn-success btn-block mt-2" onclick="submitQuiz()">
+                Submit Quiz
+            </button>
+        </div>
+    `;
+}
+
+function selectAnswer(questionId, option) {
+    if (!activeQuiz) return;
+    activeQuiz.answers[questionId] = option;
+    persist();
+
+    // Update only the affected card's option highlights
+    document.querySelectorAll(".question-option").forEach(el => {
+        // Not perfectly scoped, but fine for this demo — re-render is simpler
+    });
+    // Simple full re-render for reliability
+    render();
+}
+
+function afterQuizRender() {
+    if (!activeQuiz) return;
+    updateTimer();
+    if (quizTimerHandle) clearInterval(quizTimerHandle);
+    quizTimerHandle = setInterval(() => {
+        updateTimer();
+        if (Date.now() >= activeQuiz.expiresAt) {
+            clearInterval(quizTimerHandle);
+            submitQuiz(true);
+        }
+    }, 1000);
+}
+
+function updateTimer() {
+    const box = document.getElementById("timerBox");
+    if (!box || !activeQuiz) return;
+    const remainMs = Math.max(0, activeQuiz.expiresAt - Date.now());
+    const total = Math.floor(remainMs / 1000);
+    const m = String(Math.floor(total / 60)).padStart(2, "0");
+    const s = String(total % 60).padStart(2, "0");
+    box.textContent = `⏱ ${m}:${s}`;
+    box.classList.toggle("danger", total <= 30);
+}
+
+function submitQuiz(auto = false) {
+    if (!activeQuiz) return;
+
+    if (!auto) {
+        const unanswered = activeQuiz.questions.length - Object.keys(activeQuiz.answers).length;
+        if (unanswered > 0 && !confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) {
+            return;
+        }
+    }
+
+    if (quizTimerHandle) clearInterval(quizTimerHandle);
+
+    const quiz = DB.quizzes.find(q => q.quizId === activeQuiz.quizId);
+    let correct = 0;
+
+    activeQuiz.questions.forEach(q => {
+        const selected = activeQuiz.answers[q.questionId] || null;
+        const isCorrect = selected === q.correctOption;
+        if (isCorrect) correct++;
+
+        DB.userAnswers.push({
+            quizId: activeQuiz.quizId,
+            questionId: q.questionId,
+            selected,
+            isCorrect
+        });
+    });
+
+    const total = activeQuiz.questions.length;
+    const score = Math.round((correct / total) * 100);
+
+    quiz.submittedAt = new Date().toISOString();
+    quiz.status = "COMPLETED";
+
+    DB.quizResults.push({
+        quizId: quiz.quizId,
+        score, total, correct
+    });
+
+    const finishedId = activeQuiz.quizId;
+    activeQuiz = null;
+    persist();
+
+    navigate("result", { quizId: finishedId });
+}
+
+/* ---------- Result ---------- */
+function viewResult() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    const quizId = Number(routeParams.quizId);
+    const quiz = DB.quizzes.find(q => q.quizId === quizId);
+    const res  = DB.quizResults.find(r => r.quizId === quizId);
+    if (!quiz || !res || quiz.userId !== user.userId) {
+        return `${navbar()}<div class="container"><div class="alert alert-danger">Result not found.</div></div>`;
+    }
+
+    const answers = DB.userAnswers.filter(a => a.quizId === quizId);
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <div class="card text-center mb-4">
+                <div class="text-muted small mb-1">YOUR SCORE</div>
+                <div style="font-size:3rem;font-weight:700;color:var(--primary);line-height:1">${res.score}%</div>
+                <div class="text-muted mt-2">${res.correct} of ${res.total} correct</div>
+            </div>
+
+            <h3 class="mb-3">Review</h3>
+
+            ${answers.map((a, i) => {
+                const q = DB.questions.find(x => x.questionId === a.questionId);
+                if (!q) return "";
+                return `
+                    <div class="card mb-3">
+                        <div class="flex between center mb-2">
+                            <span class="fw-bold">${i + 1}. ${escapeHtml(q.text)}</span>
+                            <span class="badge ${a.isCorrect ? "badge-success" : "badge-danger"}">
+                                ${a.isCorrect ? "Correct" : "Wrong"}
+                            </span>
+                        </div>
+                        <div class="small mb-2">
+                            Your answer: <b>${a.selected || "—"}</b> &nbsp;|&nbsp;
+                            Correct: <b>${q.correctOption}</b>
+                        </div>
+                        ${q.explanation ? `<div class="small text-muted">${escapeHtml(q.explanation)}</div>` : ""}
+                        ${!a.isCorrect
+                            ? `<button class="btn btn-sm btn-outline mt-2"
+                                       onclick="explainAnswer(${q.questionId},'${a.selected || ""}')">
+                                   <span class="ai-badge">AI</span> Explain my mistake
+                               </button>
+                               <div id="ai-${q.questionId}" class="mt-2"></div>`
+                            : ""}
+                    </div>
+                `;
+            }).join("")}
+
+            <button class="btn btn-primary" onclick="navigate('student-dashboard')">Back to dashboard</button>
+            <button class="btn btn-outline" onclick="navigate('quiz-setup')">Take another quiz</button>
+        </div>
+    `;
+}
+
+function explainAnswer(questionId, selected) {
+    const user = currentUser();
+    const q = DB.questions.find(x => x.questionId === questionId);
+    if (!q || !user) return;
+
+    const box = document.getElementById("ai-" + questionId);
+    box.innerHTML = `<div class="text-muted small">AI is thinking…</div>`;
+
+    setTimeout(() => {
+        const r = AI.explain(q, selected);
+        AI.logExplain(user.userId, questionId, selected, r);
+
+        box.innerHTML = `
+            <div class="alert alert-info">
+                <div class="mb-2"><span class="ai-badge">AI Explanation</span></div>
+                <p class="mb-2"><b>Mistake:</b> ${escapeHtml(r.mistake)}</p>
+                <p class="mb-2"><b>Correct answer:</b> ${escapeHtml(r.correctAnswer)}</p>
+                <div class="mb-2"><b>Steps:</b>
+                    <ol class="mb-0" style="padding-left:20px">
+                        ${r.steps.map(s => `<li>${escapeHtml(s)}</li>`).join("")}
+                    </ol>
+                </div>
+                <p class="mb-0"><b>Tip:</b> ${escapeHtml(r.tip)}</p>
+            </div>
+        `;
+    }, 350);
+}
+
+/* ---------- History ---------- */
+function viewHistory() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    const rows = DB.quizzes
+        .filter(q => q.userId === user.userId)
+        .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-3">Performance History</h2>
+            <div class="card">
+                ${rows.length === 0
+                    ? `<p class="text-muted text-center" style="margin:20px 0">No quizzes yet.</p>`
+                    : `<table class="table">
+                        <thead><tr>
+                            <th>Quiz</th><th>Started</th><th>Status</th><th>Score</th><th></th>
+                        </tr></thead>
+                        <tbody>
+                            ${rows.map(r => {
+                                const res = DB.quizResults.find(x => x.quizId === r.quizId);
+                                return `
+                                    <tr>
+                                        <td>#${r.quizId}</td>
+                                        <td class="text-muted small">${formatDate(r.startedAt)}</td>
+                                        <td><span class="badge ${r.status === "COMPLETED" ? "badge-success" : ""}">${escapeHtml(r.status)}</span></td>
+                                        <td>${res ? res.score + "%" : "—"}</td>
+                                        <td class="text-center">
+                                            ${res ? `<button class="btn btn-sm btn-outline" onclick="navigate('result',{quizId:${r.quizId}})">View</button>` : ""}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                       </table>`
+                }
+            </div>
+        </div>
+    `;
+}
+
+/* ---------- AI Assistant ---------- */
+function viewAiAssistant() {
+    const user = currentUser();
+    if (!user) { navigate("login"); return ""; }
+
+    const weak = AI.weakCategories(user.userId);
+    const weakNames = weak.map(id => categoryById(id)?.name).filter(Boolean);
+
+    const generated = routeParams.generated || null;
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-1">AI Assistant <span class="ai-badge">AI</span></h2>
+            <p class="text-muted mb-3">Personalized practice based on your weak topics.</p>
+
+            <div class="card mb-3">
+                <h3>Your weak topics</h3>
+                ${weakNames.length === 0
+                    ? `<p class="text-muted mb-2">
+                           Take a few quizzes first, or generate a general practice set.
+                       </p>`
+                    : `<div class="mb-3">
+                           ${weakNames.map(n => `<span class="badge badge-danger me-1">${escapeHtml(n)}</span>`).join(" ")}
+                       </div>`
+                }
+                <button class="btn btn-primary" onclick="generateAiQuestions()">
+                    Generate 5 personalized questions
+                </button>
+            </div>
+
+            <div id="aiGen">
+                ${generated ? renderGenerated(generated) : ""}
+            </div>
+        </div>
+    `;
+}
+
+function generateAiQuestions() {
+    const user = currentUser();
+    if (!user) return;
+
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = "Generating…";
+
+    setTimeout(() => {
+        const generated = AI.generateQuestions(user.userId, 5);
+        navigate("ai-assistant", { generated });
+    }, 400);
+}
+
+function renderGenerated(list) {
+    return `
+        <h3 class="mb-3">Generated for you</h3>
+        ${list.map((q, i) => {
+            const cat = categoryById(q.categoryId);
+            return `
+                <div class="card mb-3">
+                    <div class="flex between center mb-2">
+                        <div>
+                            <span class="badge">${escapeHtml(cat?.name || "")}</span>
+                            <span class="ai-badge">AI</span>
+                        </div>
+                        <span class="difficulty-${q.difficulty}">${q.difficulty}</span>
+                    </div>
+                    <div class="fw-bold mb-2">${i + 1}. ${escapeHtml(q.text)}</div>
+                    <div class="small mb-2">
+                        ${["A","B","C","D"].map(o => `
+                            <div class="mb-1"><b>${o}.</b> ${escapeHtml(q["option" + o])}</div>
+                        `).join("")}
+                    </div>
+                    <details>
+                        <summary>Show answer &amp; explanation</summary>
+                        <div class="small mt-2">
+                            <div><b>Correct:</b> ${q.correctOption}</div>
+                            <div class="text-muted">${escapeHtml(q.explanation || "")}</div>
+                        </div>
+                    </details>
+                </div>
+            `;
+        }).join("")}
+    `;
+}
+
+/* ---------- Admin Dashboard ---------- */
+function viewAdminDashboard() {
+    const user = currentUser();
+    if (!user || user.role !== "ADMIN") { navigate("login"); return ""; }
+
+    const students = DB.users.filter(u => u.role === "STUDENT");
+    const quizzes  = DB.quizzes.length;
+    const avg = DB.quizResults.length
+        ? Math.round(DB.quizResults.reduce((s, r) => s + r.score, 0) / DB.quizResults.length)
+        : 0;
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-3">Admin Dashboard</h2>
+            <div class="row mb-4">
+                <div class="col card stats-card">
+                    <div class="stat-value">${students.length}</div>
+                    <div class="stat-label">Students</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${DB.questions.length}</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${DB.categories.length}</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${quizzes}</div>
+                    <div class="stat-label">Quizzes Taken</div>
+                </div>
+                <div class="col card stats-card">
+                    <div class="stat-value">${avg}%</div>
+                    <div class="stat-label">Avg Score</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col card tile" onclick="navigate('admin-questions')">
+                    <h4>📝 Manage Questions</h4>
+                    <p>Add, edit, and remove questions.</p>
+                </div>
+                <div class="col card tile" onclick="navigate('admin-categories')">
+                    <h4>🏷 Manage Categories</h4>
+                    <p>Add, edit, and remove categories.</p>
+                </div>
+                <div class="col card tile" onclick="navigate('admin-students')">
+                    <h4>👥 Students</h4>
+                    <p>View registered students.</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* ---------- Admin: Questions ---------- */
+function viewAdminQuestions() {
+    const user = currentUser();
+    if (!user || user.role !== "ADMIN") { navigate("login"); return ""; }
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-3">Manage Questions</h2>
+
+            <div class="card mb-3">
+                <h3>Add a question</h3>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select class="form-select" id="newCat">
+                                ${DB.categories.map(c => `
+                                    <option value="${c.categoryId}">${escapeHtml(c.name)}</option>
+                                `).join("")}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Difficulty</label>
+                            <select class="form-select" id="newDiff">
+                                <option>EASY</option><option>MEDIUM</option><option>HARD</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Correct option</label>
+                            <select class="form-select" id="newCorrect">
+                                <option value="A">A</option><option value="B">B</option>
+                                <option value="C">C</option><option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Question text</label>
+                    <input class="form-control" id="newText" placeholder="Question text">
+                </div>
+                <div class="row">
+                    <div class="col"><input class="form-control" id="newA" placeholder="Option A"></div>
+                    <div class="col"><input class="form-control" id="newB" placeholder="Option B"></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col"><input class="form-control" id="newC" placeholder="Option C"></div>
+                    <div class="col"><input class="form-control" id="newD" placeholder="Option D"></div>
+                </div>
+                <div class="form-group mt-2">
+                    <label>Explanation (optional)</label>
+                    <input class="form-control" id="newExp" placeholder="Explanation">
+                </div>
+                <button class="btn btn-primary" onclick="createQuestion()">Save question</button>
+            </div>
+
+            <div class="card">
+                <h3>All questions (${DB.questions.length})</h3>
+                <table class="table">
+                    <thead><tr>
+                        <th>ID</th><th>Category</th><th>Text</th><th>Difficulty</th><th>Answer</th><th></th>
+                    </tr></thead>
+                    <tbody>
+                        ${DB.questions.slice().reverse().map(q => `
+                            <tr>
+                                <td>#${q.questionId}</td>
+                                <td class="small">${escapeHtml(categoryById(q.categoryId)?.name || "")}</td>
+                                <td>${escapeHtml(q.text)}</td>
+                                <td class="difficulty-${q.difficulty}">${q.difficulty}</td>
+                                <td><b>${q.correctOption}</b></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="deleteQuestion(${q.questionId})">Delete</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function createQuestion() {
+    const catId  = Number(document.getElementById("newCat").value);
+    const diff   = document.getElementById("newDiff").value;
+    const correct = document.getElementById("newCorrect").value;
+    const text   = document.getElementById("newText").value.trim();
+    const a = document.getElementById("newA").value.trim();
+    const b = document.getElementById("newB").value.trim();
+    const c = document.getElementById("newC").value.trim();
+    const d = document.getElementById("newD").value.trim();
+    const exp = document.getElementById("newExp").value.trim();
+
+    if (!text || !a || !b || !c || !d) {
+        alert("Please fill in the question and all four options.");
+        return;
+    }
+
+    DB.questions.push({
+        questionId: uid(),
+        categoryId: catId,
+        text,
+        optionA: a, optionB: b, optionC: c, optionD: d,
+        correctOption: correct,
+        difficulty: diff,
+        explanation: exp
+    });
+    persist();
+    render();
+}
+
+function deleteQuestion(id) {
+    if (!confirm("Delete this question?")) return;
+    const idx = DB.questions.findIndex(q => q.questionId === id);
+    if (idx >= 0) DB.questions.splice(idx, 1);
+    persist();
+    render();
+}
+
+/* ---------- Admin: Categories ---------- */
+function viewAdminCategories() {
+    const user = currentUser();
+    if (!user || user.role !== "ADMIN") { navigate("login"); return ""; }
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-3">Manage Categories</h2>
+
+            <div class="card mb-3">
+                <h3>Add a category</h3>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input class="form-control" id="newCatName" placeholder="Category name">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select class="form-select" id="newCatType">
+                                <option>APTITUDE</option>
+                                <option>PROGRAMMING</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col" style="display:flex;align-items:flex-end">
+                        <button class="btn btn-primary btn-block" onclick="createCategory()">Add</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>All categories (${DB.categories.length})</h3>
+                <table class="table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Type</th><th></th></tr></thead>
+                    <tbody>
+                        ${DB.categories.map(c => `
+                            <tr>
+                                <td>#${c.categoryId}</td>
+                                <td>${escapeHtml(c.name)}</td>
+                                <td><span class="badge">${escapeHtml(c.type)}</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="deleteCategory(${c.categoryId})">Delete</button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function createCategory() {
+    const name = document.getElementById("newCatName").value.trim();
+    const type = document.getElementById("newCatType").value;
+    if (!name) { alert("Enter a name"); return; }
+    if (DB.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+        alert("Category already exists");
+        return;
+    }
+    DB.categories.push({ categoryId: uid(), name, type });
+    persist();
+    render();
+}
+
+function deleteCategory(id) {
+    const inUse = DB.questions.some(q => q.categoryId === id);
+    if (inUse) {
+        alert("Cannot delete: questions still reference this category.");
+        return;
+    }
+    if (!confirm("Delete this category?")) return;
+    const idx = DB.categories.findIndex(c => c.categoryId === id);
+    if (idx >= 0) DB.categories.splice(idx, 1);
+    persist();
+    render();
+}
+
+/* ---------- Admin: Students ---------- */
+function viewAdminStudents() {
+    const user = currentUser();
+    if (!user || user.role !== "ADMIN") { navigate("login"); return ""; }
+
+    const students = DB.users.filter(u => u.role === "STUDENT");
+
+    return `
+        ${navbar()}
+        <div class="container">
+            <h2 class="mb-3">Registered Students</h2>
+            <div class="card">
+                ${students.length === 0
+                    ? `<p class="text-muted text-center" style="margin:20px 0">No students registered yet.</p>`
+                    : `<table class="table">
+                        <thead><tr>
+                            <th>ID</th><th>Name</th><th>Email</th>
+                            <th>Quizzes</th><th>Avg Score</th>
+                        </tr></thead>
+                        <tbody>
+                            ${students.map(s => {
+                                const quizzes = DB.quizzes.filter(q => q.userId === s.userId && q.status === "COMPLETED");
+                                const results = quizzes
+                                    .map(q => DB.quizResults.find(r => r.quizId === q.quizId))
+                                    .filter(Boolean);
+                                const avg = results.length
+                                    ? Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length)
+                                    : null;
+                                return `
+                                    <tr>
+                                        <td>#${s.userId}</td>
+                                        <td>${escapeHtml(s.name)}</td>
+                                        <td>${escapeHtml(s.email)}</td>
+                                        <td>${quizzes.length}</td>
+                                        <td>${avg != null ? avg + "%" : "—"}</td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                       </table>`
+                }
+            </div>
+        </div>
+    `;
+}
+
+/* ------------------------------------------------------------
+   8. Router render
+   ------------------------------------------------------------ */
+function render() {
+    const app = document.getElementById("app");
+    let html = "";
+    let after = null;
+
+    switch (currentRoute) {
+        case "splash":             html = viewSplash();            break;
+        case "login":              html = viewLogin();    after = afterLoginRender;    break;
+        case "register":           html = viewRegister(); after = afterRegisterRender; break;
+        case "student-dashboard":  html = viewStudentDashboard();  break;
+        case "practice":           html = viewPractice();          break;
+        case "quiz-setup":         html = viewQuizSetup();         break;
+        case "quiz":               html = viewQuiz();      after = afterQuizRender;    break;
+        case "result":             html = viewResult();            break;
+        case "history":            html = viewHistory();           break;
+        case "ai-assistant":       html = viewAiAssistant();       break;
+        case "admin-dashboard":    html = viewAdminDashboard();    break;
+        case "admin-questions":    html = viewAdminQuestions();    break;
+        case "admin-categories":   html = viewAdminCategories();   break;
+        case "admin-students":     html = viewAdminStudents();     break;
+        default:                   html = viewSplash();
+    }
+
+    app.innerHTML = html;
+    if (typeof after === "function") after();
+}
+
+/* ------------------------------------------------------------
+   9. Boot
+   ------------------------------------------------------------ */
+restore();
+
+// Decide initial route
+if (!session) {
+    currentRoute = "splash";
+} else {
+    currentRoute = session.role === "ADMIN" ? "admin-dashboard" : "student-dashboard";
+}
+
+render();
+</script>
+</body>
+</html>
